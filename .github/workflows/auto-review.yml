@@ -30,6 +30,8 @@ jobs:
       run: |
         DIFF=$(cat pr_diff.patch)
         DESCRIPTION=${{ steps.description.outputs.description }}
+        echo "diff $DIFF"
+        echo "description $DESCRIPTION"
         RESPONSE=$(curl -X POST "https://api.openai.com/v1/chat/completions" \
           -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
           -H "Content-Type: application/json" \
@@ -42,7 +44,7 @@ jobs:
                   },
                   {
                     "role": "user",
-                    "content": "以下のプルリクエストをレビューしてください:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF"
+                    "content": "以下のプルリクエストをレビューしてください:\n\nDescription: ' + $DESCRIPTION + '\n\nDiff: '+ $DIFF + '"
                   }
                 ]
               }'
