@@ -30,13 +30,23 @@ jobs:
       run: |
         DIFF=$(cat pr_diff.patch)
         DESCRIPTION=${{ steps.description.outputs.description }}
-        RESPONSE=$(curl -X POST "https://api.openai.com/v1/engines/davinci-codex/completions" \
+        RESPONSE=$(curl -X POST "https://api.openai.com/v1/chat/completions" \
           -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{
-                "prompt": "以下のプルリクエストをレビューしてください:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF",
-                "max_tokens": 500
-              }')
+                "model": "gpt-4o",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                  },
+                  {
+                    "role": "user",
+                    "content": "以下のプルリクエストをレビューしてください:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF",
+                  }
+                ]
+              }'
+        )
         echo "::set-output name=response::$(echo $RESPONSE | jq -r '.choices[0].text')"
 
     - name: Post review comment
