@@ -17,13 +17,13 @@ jobs:
       run: |
         PR_DIFF=$(gh pr diff ${{ github.event.pull_request.number }} --patch)
         echo "$PR_DIFF" > pr_diff.patch
-        echo "::set-output name=diff::$(echo $PR_DIFF)"
+        echo "::set-output name=diff::$(echo $PR_DIFF | jq -sRr @json)"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Get PR description
       id: description
-      run: echo "::set-output name=description::${{ github.event.pull_request.body }}"
+      run: echo "::set-output name=description::${{ github.event.pull_request.body | jq -sRr @json }}"
 
     - name: Call ChatGPT API
       id: review
@@ -44,7 +44,7 @@ jobs:
                   },
                   {
                     "role": "user",
-                    "content": "以下のプルリクエストをレビューしてください:\n\nDescription: ' + $DESCRIPTION + '\n\nDiff: '+ $DIFF + '"
+                    "content": "以下のプルリクエストをレビューしてください:\n\nDescription: ' + "$DESCRIPTION" + '\n\nDiff: '+ "$DIFF" + '"
                   }
                 ]
               }'
