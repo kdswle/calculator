@@ -1,0 +1,43 @@
+name: PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Get PR diff
+      id: diff
+      run: |
+        PR_DIFF=$(gh pr diff ${{ github.event.pull_request.number }} --patch)
+        echo "$PR_DIFF" > pr_diff.patch
+        echo "::set-output name=diff::$(echo $PR_DIFF)"
+
+    - name: Get PR description
+      id: description
+      run: echo "::set-output name=description::${{ github.event.pull_request.body }}"
+
+    - name: Call ChatGPT API
+      id: review
+      run: |
+        DIFF=$(cat pr_diff.patch)
+        DESCRIPTION=${{ steps.description.outputs.description }}
+        RESPONSE=$(curl -X POST "https://api.openai.com/v1/engines/davinci-codex/completions" \
+          -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "prompt": "Review the following pull request:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF",
+                "max_tokens": 500
+              }')
+        echo "::set-output name=response::$(echo $RESPONSE | jq -r '.choices[0].text')"
+
+    - name: Post review comment
+      run: |
+        REVIEW_COMMENT=${{ steps.review.outputs.response }}
+        gh pr comment ${{ github.event.pull_request.number }} --body "$REVIEW_COMMENT"
