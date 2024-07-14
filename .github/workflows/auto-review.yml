@@ -47,6 +47,7 @@ jobs:
                 ]
               }'
         )
+        echo "response $RESPONSE"
         echo "::set-output name=response::$(echo $RESPONSE | jq -r '.choices[0].message.content')"
 
     - name: Post review comment
