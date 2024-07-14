@@ -42,7 +42,7 @@ jobs:
                   },
                   {
                     "role": "user",
-                    "content": "以下のプルリクエストをレビューしてください:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF",
+                    "content": "以下のプルリクエストをレビューしてください:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF"
                   }
                 ]
               }'
