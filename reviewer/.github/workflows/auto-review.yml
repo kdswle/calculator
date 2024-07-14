@@ -32,7 +32,7 @@ jobs:
           -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{
-                "prompt": "Review the following pull request:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF",
+                "prompt": "以下のプルリクエストをレビューしてください:\n\nDescription: $DESCRIPTION\n\nDiff: $DIFF",
                 "max_tokens": 500
               }')
         echo "::set-output name=response::$(echo $RESPONSE | jq -r '.choices[0].text')"
